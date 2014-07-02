@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<data>
+	<tweet txt="hello world here is your #tweet text" img="./images/helloworld.gif" />
+</data>
