@@ -16,7 +16,7 @@ $ pip install tweepy
 
 * Download
 ```bash
-$ git clone git@github.com:ssivakorn/simple_auto_tweet.git
+$ git clone git@github.com:ssivakorn/simpletweetbot.git
 ```
 * Configure tw_secret.xml. Get your own API and access token from https://apps.twitter.com/
 ```xml
@@ -52,7 +52,7 @@ img="PATH TO YOUR IMAGE"
 ## Start Running
 
 ```bash
-$ python auto_tweet.py -s <xml_secret_key_file> -t <tweet_txt_file> -i <interval_in_second>
+$ python tweetbot.py -s <xml_secret_key_file> -t <tweet_txt_file> -i <interval_in_second>
 ```
 Supplied Arguments:
 
