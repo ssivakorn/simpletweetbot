@@ -1,48 +1,54 @@
 #!/usr/bin/python
 import sys
 import os
-import tweepy
 import time
 import getopt
+import random
 import xml.etree.ElementTree as ET
+# tweepy lib
+import tweepy
 
 # options and arguments
 USAGE = 'auto_tweet.py ' + \
-	'-s <xml_secret_key_file> ' + \
-	'-t <tweet_txt_file> ' + \
-	'-i <interval_in_second>'
+		'-s <xml_secret_key_file> ' + \
+		'-t <tweet_txt_file> ' + \
+		'-i <interval_in_second>' + \
+		'-r'
 
-# read from command line arguments
+# func: read from command line arguments
 def readopts(argv):
-    secretkey_file = ''
-    tweettxt_file = ''
-    interval = ''
+	secretkey_file = ''
+	tweettxt_file = ''
+	interval = ''
+	random_on = False
 
-    if not argv:
-        print USAGE
-        sys.exit(2)
+	if not argv:
+		print USAGE
+		sys.exit(2)
 
-    try:
-	opts, args = getopt.getopt(argv, 'hs:t:i:', ['help', 'secretkey=', 'tweettxt=', 'intvl='])
-    except getopt.GetoptError:
-	print USAGE
-	sys.exit(2)
+	try:
+		opts, args = getopt.getopt(argv, 'hrs:t:i:', ['help', 'random', 'secretkey=', 'tweettxt=', 'intvl='])
+	except getopt.GetoptError:
+		print USAGE
+		sys.exit(2)
 
-    for opt, arg in opts:
-	if opt in ('-h', '--help'):
-	    print USAGE
-	    sys.exit(0)
-	elif opt in ('-s', '--secretkey'):
-	    secretkey_file = arg
-	elif opt in ('-t', '--tweettxt'):
-	    tweettxt_file = arg
-	elif opt in ('-i' , '--interval'):
-	    interval = arg
+	for opt, arg in opts:
+		if opt in ('-h', '--help'):
+			print USAGE
+			sys.exit(0)
+		elif opt in ('-r', '--random'):
+			random_on = True
+		elif opt in ('-s', '--secretkey'):
+			secretkey_file = arg
+		elif opt in ('-t', '--tweettxt'):
+			tweettxt_file = arg
+		elif opt in ('-i' , '--interval'):
+			interval = arg
 
-    return [secretkey_file, tweettxt_file, interval]
+	return [secretkey_file, tweettxt_file, interval, random_on]
 
-# read secretkey from xml
-def readsecrets(secretkey_file):
+# func: read secretkey from xml
+def read_secrets(secretkey_file):
 	tree = ET.parse(secretkey_file)
 	root = tree.getroot()
 	
@@ -56,13 +62,31 @@ def readsecrets(secretkey_file):
 
 	return [api_key, api_secret, accesstoken_key, accesstoken_secret]
 
-# main
+
+# func: tweet status (and image)
+# @status:	tweet status
+# @image:	tweet image
+def tweet_(status, image):
+	try:
+		if len(image) > 1:
+			print 'POSTING: ' + status + ' -- ' + image
+			api.update_with_media(image, status=status)	
+		else:
+			print 'POSTING: ' + status
+			api.update_status(status)
+
+
+	except Exception, e:
+		print "ERROR: " + e.message
+
+# main program
 opts = readopts(sys.argv[1:])
 secretkey_file 	= opts[0]
 tweettxt_file  	= opts[1]
 interval		= opts[2]
+random_on		= opts[3]
 
-secrets = readsecrets(secretkey_file)
+secrets = read_secrets(secretkey_file)
 API_KEY 	= secrets[0]
 API_SECRET	= secrets[1]
 ACCESSTOKEN_KEY 		= secrets[2]
@@ -81,24 +105,25 @@ auth.set_access_token(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET)
 api = tweepy.API(auth)
 
 tree = ET.parse(tweettxt_file)
-root = tree.getroot()
+tweets = tree.getroot()
 
-for tweet in root:
-	status = tweet.get('txt')
-	media = tweet.get('img')
-	
-	try:
-		if len(media) > 1:
-			print 'POSTING: ' + status + ' ** ' + media
-			api.update_with_media(media, status=status)	
-		else:
-			print 'POSTING: ' + status
-			api.update_status(status)
 
+if random_on:
+	while(True):
+		random_num = random.randint(1, int(len(tweets)))	
+		tweet = tweets[random_num]
+		# call tweet
+		tweet_(tweet.get('txt'), tweet.get('img'))
+
+		# sleep for given interval
 		time.sleep(int(interval))
-
-	except Exception, e:
-		print "ERROR: " + e.message
+else:
+	for tweet in tweets:
+		# call tweet
+		tweet_(tweet.get('txt'), tweet.get('img'))
+		
+		# sleep for given interval
+		time.sleep(int(interval))
 
 '''
 #filename = open(tweettxt_file, 'r')

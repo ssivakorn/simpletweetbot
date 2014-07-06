@@ -52,13 +52,13 @@ img="PATH TO YOUR IMAGE"
 ## Start Running
 
 ```bash
-$ python tweetbot.py -s <xml_secret_key_file> -t <tweet_txt_file> -i <interval_in_second>
+$ python tweetbot.py -s <xml_secret_key_file> -t <tweet_txt_file> -i <interval_in_second> -r
 ```
 Supplied Arguments:
 
 * -s xml_secret_key_file
 * -t xml_tweet_text_file
 * -i time interval (interval between each tweet status in second)
-
+* -r randomly tweet status (not follow the order in tweet_text_file)
 
 This manual is made by (GitHub-Flavored) Markdown Editor: http://jbt.github.io/markdown-editor/
