@@ -109,7 +109,7 @@ tweets = tree.getroot()
 # random function on
 if random_on:
 	while(True):
-		random_num = random.randint(1, int(len(tweets)))	
+		random_num = random.randint(0, int(len(tweets)) - 1)	
 		tweet = tweets[random_num]
 		# call tweet
 		tweet_(tweet.get('txt'), tweet.get('img'))
