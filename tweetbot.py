@@ -75,9 +75,8 @@ def tweet_(status, image):
 			print 'POSTING: ' + status
 			api.update_status(status)
 
-
 	except Exception, e:
-		print "ERROR: " + e.message
+		print repr(e)
 
 # main program
 opts = readopts(sys.argv[1:])
@@ -93,12 +92,12 @@ ACCESSTOKEN_KEY 		= secrets[2]
 ACCESSTOKEN_SECRET 	= secrets[3]
 
 
-print "API_KEY: " + API_KEY
-print "API_SECRET: " + API_SECRET
-print "ACCESSTOKEN_KEY: " + ACCESSTOKEN_KEY
-print "ACCESSTOKEN_SECRET: " + ACCESSTOKEN_SECRET
-print "TWEET FILE: " + tweettxt_file
-print "INTERVAL: " + interval
+print "API_KEY: \t\t" + API_KEY
+print "API_SECRET: \t\t" + API_SECRET
+print "ACCESSTOKEN_KEY: \t" + ACCESSTOKEN_KEY
+print "ACCESSTOKEN_SECRET: \t" + ACCESSTOKEN_SECRET
+print "TWEET FILE: \t\t" + tweettxt_file
+print "INTERVAL: \t\t" + interval
 
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESSTOKEN_KEY, ACCESSTOKEN_SECRET)
@@ -107,7 +106,7 @@ api = tweepy.API(auth)
 tree = ET.parse(tweettxt_file)
 tweets = tree.getroot()
 
-
+# random function on
 if random_on:
 	while(True):
 		random_num = random.randint(1, int(len(tweets)))	
@@ -117,6 +116,8 @@ if random_on:
 
 		# sleep for given interval
 		time.sleep(int(interval))
+
+# random function off
 else:
 	for tweet in tweets:
 		# call tweet
@@ -124,27 +125,3 @@ else:
 		
 		# sleep for given interval
 		time.sleep(int(interval))
-
-'''
-#filename = open(tweettxt_file, 'r')
-#f = filename.readlines()
-#filename.close()
-
-for line in f:
-	#api.update_status(line)
-	#print line
-	
-	strings = line.split(' -- ',2)
-	status = strings[0]
-	
-	if len(strings) > 1:
-		media = strings[1].strip()
-		print 'POSTING: ' + status + ' ** ' + media
-		print media
-		api.update_with_media(media, status=status)	
-	else:
-		print 'POSTING: ' + status
-		api.update_status(status)
-
-		time.sleep(interval)
-'''

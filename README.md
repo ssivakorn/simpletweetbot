@@ -6,6 +6,7 @@ Features:
 * Auto tweet -- adjustable interval in second e.g. tweet every hour
 * Written in Python, Easy! and Portable!
 * Easy adjustable tweet status and image in xml
+* Support tweet in global languages (unicode)
 
 ## Installation
 
