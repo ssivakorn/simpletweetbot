@@ -77,6 +77,9 @@ def tweet_(status, image):
 
 	except Exception, e:
 		print repr(e)
+		return False
+
+	return True
 
 # main program
 opts = readopts(sys.argv[1:])
@@ -108,20 +111,22 @@ tweets = tree.getroot()
 
 # random function on
 if random_on:
-	while(True):
+	while (True):
 		random_num = random.randint(0, int(len(tweets)) - 1)	
 		tweet = tweets[random_num]
 		# call tweet
-		tweet_(tweet.get('txt'), tweet.get('img'))
+		tw_status = tweet_(tweet.get('txt'), tweet.get('img'))
 
-		# sleep for given interval
-		time.sleep(int(interval))
-
+		if tw_status:
+			# sleep for given interval
+			time.sleep(int(interval))
+		
 # random function off
 else:
 	for tweet in tweets:
 		# call tweet
-		tweet_(tweet.get('txt'), tweet.get('img'))
+		tw_status = tweet_(tweet.get('txt'), tweet.get('img'))		
 		
-		# sleep for given interval
-		time.sleep(int(interval))
+		if tw_status:
+			# sleep for given interval
+			time.sleep(int(interval))
