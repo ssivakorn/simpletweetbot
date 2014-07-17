@@ -4,6 +4,7 @@ import os
 import time
 import getopt
 import random
+import datetime
 import xml.etree.ElementTree as ET
 # tweepy lib
 import tweepy
@@ -14,6 +15,10 @@ USAGE = 'auto_tweet.py ' + \
 		'-t <tweet_txt_file> ' + \
 		'-i <interval_in_second>' + \
 		'-r'
+
+# func: get current date and time
+def get_curr_time():
+	return datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ')	
 
 # func: read from command line arguments
 def readopts(argv):
@@ -69,10 +74,10 @@ def read_secrets(secretkey_file):
 def tweet_(status, image):
 	try:
 		if len(image) > 1:
-			print 'POSTING: ' + status + ' -- ' + image
+			print 'POSTING: ' + get_curr_time() + status + ' -- ' + image
 			api.update_with_media(image, status=status)	
 		else:
-			print 'POSTING: ' + status
+			print 'POSTING: ' + get_curr_time() + status
 			api.update_status(status)
 
 	except Exception, e:
