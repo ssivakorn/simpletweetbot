@@ -10,10 +10,10 @@ import xml.etree.ElementTree as ET
 import tweepy
 
 # options and arguments
-USAGE = 'auto_tweet.py ' + \
+USAGE = sys.argv[0] + " " + \
 		'-s <xml_secret_key_file> ' + \
 		'-t <tweet_txt_file> ' + \
-		'-i <interval_in_second>' + \
+		'-i <interval_in_second> ' + \
 		'-r'
 
 # func: get current date and time
@@ -90,8 +90,8 @@ def tweet_(status, image):
 opts = readopts(sys.argv[1:])
 secretkey_file 	= opts[0]
 tweettxt_file  	= opts[1]
-interval		= opts[2]
-random_on		= opts[3]
+interval	= opts[2]
+random_on	= opts[3]
 
 secrets = read_secrets(secretkey_file)
 API_KEY 	= secrets[0]
