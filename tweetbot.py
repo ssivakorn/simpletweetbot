@@ -5,54 +5,48 @@ import time
 import getopt
 import random
 import datetime
+import argparse
 import xml.etree.ElementTree as ET
+
 # tweepy lib
 import tweepy
-
-# options and arguments
-USAGE = sys.argv[0] + " " + \
-		'-s <xml_secret_key_file> ' + \
-		'-t <tweet_txt_file> ' + \
-		'-i <interval_in_second> ' + \
-		'-r'
-
-# func: get current date and time
+# constants
+MIN = 60
 def get_curr_time():
-    return datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ')	
+    """ get current time in string: year-month-date hour:min:sec
+    """
+    return datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S] ')
 
-# func: read from command line arguments
-def readopts(argv):
-    secretkey_file = ''
-    tweettxt_file = ''
-    interval = ''
-    random_on = False
+def read_args():
+    """ read argument
+    """
+    secretkey = None
+    tweettxt = None
+    mininterval = 0 # min
+    rand = False
 
-    if not argv:
-        print USAGE
-        sys.exit(2)
-    try:
-        opts, args = getopt.getopt(argv, 'hrs:t:i:', ['help', 'random', 'secretkey=', 'tweettxt=', 'intvl='])
-    except getopt.GetoptError:
-        print USAGE
-        sys.exit(2)
+    parser = argparse.ArgumentParser(description="tweetbot: automate tweet")
+    parser.add_argument('-t', '--tweettxt', required=True,
+                        help="tweettxt file")
+    parser.add_argument('-r', '--random', action='store_true',
+                        help="random tweet from tweettxt file")
+    parser.add_argument('-s', '--secretkey', required=True,
+                        help="tweeter api secret key file")
+    parser.add_argument('-i', '--interval', default=15,
+                        help="sleep interval between each tweet, \
+                                default is 15 minutes")
 
-    for opt, arg in opts:
-        if opt in ('-h', '--help'):
-            print USAGE
-            sys.exit(0)
-        elif opt in ('-r', '--random'):
-            random_on = True
-        elif opt in ('-s', '--secretkey'):
-            secretkey_file = arg
-        elif opt in ('-t', '--tweettxt'):
-            tweettxt_file = arg
-        elif opt in ('-i' , '--interval'):
-            interval = arg
+    args = parser.parse_args()
+    tweettxt = args.tweettxt
+    secretkey = args.secretkey
+    rand = args.random
+    mininterval = int(args.interval) * MIN
 
-    return (secretkey_file, tweettxt_file, interval, random_on)
+    return (secretkey, tweettxt, mininterval, rand)
 
-# func: read secretkey from xml
 def _read_secrets(secretkey_file):
+    """ read secretkey from xml
+    """
     tree = ET.parse(secretkey_file)
     root = tree.getroot()
 
@@ -66,11 +60,12 @@ def _read_secrets(secretkey_file):
 
     return (api_key, api_secret, accesstoken_key, accesstoken_secret)
 
-
-# func: tweet status (and image)
-# @status:	tweet status
-# @image:	tweet image
 def _tweet(status, image=""):
+    """ tweet status (and image)
+    status:	tweet status
+    image:	tweet image
+
+    """
     try:
         print '[+] POSTING: ' + get_curr_time() + status + ' -- ' + image
         if image:
@@ -88,51 +83,55 @@ def _tweeter_auth(api_key, api_secret, accesstoken_key, accesstoken_secret):
     auth.set_access_token(accesstoken_key, accesstoken_secret)
     return tweepy.API(auth)
 
-def tweetbot(tweettxt_f, random_on=False):
-
+def tweetbot(tweettxt_f, mininterval, random_on):
     # open tweettxt file
     tree = ET.parse(tweettxt_f)
     tweets = tree.getroot()
 
     # random function on
     if random_on:
-        while (True):
-            random_num = random.randint(0, int(len(tweets)) - 1)	
+        while True:
+            random_num = random.randint(0, int(len(tweets)) - 1)
             tweet = tweets[random_num]
             # call tweet
             tw_status = _tweet(tweet.get('txt'), tweet.get('img'))
 
+            # sleep for given interval
             if tw_status:
-                # sleep for given interval
-                time.sleep(int(interval))
+                time.sleep(int(mininterval))
 
     # random function off
     else:
         for tweet in tweets:
             # call tweet
-            tw_status = _tweet(tweet.get('txt'), tweet.get('img'))		
+            tw_status = _tweet(tweet.get('txt'), tweet.get('img'))
             if tw_status:
                 # sleep for given interval
-                time.sleep(int(interval))
+                time.sleep(mininterval)
 
-# main program
 if __name__ == "__main__":
-    (secretkey_f, tweettxt_f, interval, random_on)= readopts(sys.argv[1:])
+
+    (secretkey_f, tweettxt_f,
+            mininterval, rand) = read_args()
     (api_key, api_secret,
      accesstoken_key, accesstoken_secret) = _read_secrets(secretkey_f)
 
-    print "API_KEY: \t\t" + api_key
-    print "API_SECRET: \t\t" + api_secret
-    print "ACCESSTOKEN_KEY: \t" + accesstoken_key
-    print "ACCESSTOKEN_SECRET: \t" + accesstoken_secret
-    print "TWEET FILE: \t\t" + tweettxt_f
-    print "INTERVAL: \t\t" + interval
+    print "[*] SETUP INFO"
+    print "\tapi key: %s" % api_key
+    print "\tapi secret: %s" % api_secret
+    print "\taccess token key: %s" % accesstoken_key
+    print "\taccess token secret: %s" % accesstoken_secret
+    print "\ttweet text file: %s" % tweettxt_f
+    print "\tinterval: %d seconds" % mininterval
+    print "\trandom order: %s" % rand
 
     # auth tweeter
-    api = _tweeter_auth(api_key, api_secret,
-                        accesstoken_key, accesstoken_secret)
+    api = _tweeter_auth(api_key,
+                        api_secret,
+                        accesstoken_key,
+                        accesstoken_secret)
 
-    tweetbot(tweettxt_f, random_on)
+    tweetbot(tweettxt_f, mininterval, rand)
 
 
 
